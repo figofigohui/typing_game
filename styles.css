@@ -88,6 +88,22 @@ header h1 {
   margin-top: 8px;
 }
 
+.letter-hidden {
+  display: none;
+  font-size: 3rem;
+  font-weight: 600;
+  color: #5b6b8f;
+  margin-top: 12px;
+}
+
+.prompt.is-hidden .letter {
+  opacity: 0.1;
+}
+
+.prompt.is-hidden .letter-hidden {
+  display: block;
+}
+
 .input {
   display: grid;
   gap: 8px;

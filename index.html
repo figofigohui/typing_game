@@ -30,11 +30,16 @@
           <span class="label">Last result</span>
           <span id="result" class="value">—</span>
         </div>
+        <div>
+          <span class="label">Time</span>
+          <span id="time" class="value">0.0s</span>
+        </div>
       </section>
 
       <section class="prompt" aria-live="polite">
         <span class="label">Type this letter</span>
         <span id="letter" class="letter">A</span>
+        <span id="letter-hidden" class="letter-hidden" aria-hidden="true">•</span>
       </section>
 
       <section class="input">
@@ -56,7 +61,8 @@
       </section>
 
       <p id="final" class="final" hidden>
-        Final score: <span id="final-score">0</span> out of 5.
+        Final score: <span id="final-score">0</span> out of 5 in
+        <span id="final-time">0.0s</span>.
       </p>
     </main>
 
