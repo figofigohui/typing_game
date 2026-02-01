@@ -1,129 +1,161 @@
-const totalRounds = 5;
 const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const gameDurationMs = 60_000;
+const spawnIntervalMs = 1200;
 
-const roundEl = document.getElementById("round");
+const timeEl = document.getElementById("time");
 const scoreEl = document.getElementById("score");
 const resultEl = document.getElementById("result");
-const timeEl = document.getElementById("time");
-const letterEl = document.getElementById("letter");
-const promptEl = document.querySelector(".prompt");
-const inputEl = document.getElementById("typed");
+const skyEl = document.querySelector(".sky");
+const startBtn = document.getElementById("start");
 const restartBtn = document.getElementById("restart");
 const finalEl = document.getElementById("final");
 const finalScoreEl = document.getElementById("final-score");
-const finalTimeEl = document.getElementById("final-time");
 
-let round = 1;
 let score = 0;
-let currentLetter = "A";
 let startTime = null;
 let timerId = null;
-let hideLetterTimeout = null;
+let spawnId = null;
+let isRunning = false;
+
+const activeApples = new Map();
 
 const getRandomLetter = () => letters[Math.floor(Math.random() * letters.length)];
+const getRandomPosition = () => Math.floor(Math.random() * 80) + 10;
+const getRandomFallDuration = () => Math.floor(Math.random() * 1500) + 2000;
 
-const updatePrompt = () => {
-  currentLetter = getRandomLetter();
-  letterEl.textContent = currentLetter;
-  inputEl.value = "";
-  inputEl.focus();
-  promptEl.classList.remove("is-hidden");
-  if (hideLetterTimeout) {
-    clearTimeout(hideLetterTimeout);
-  }
-  hideLetterTimeout = setTimeout(() => {
-    promptEl.classList.add("is-hidden");
-  }, 2000);
-};
-
-const updateStatus = () => {
-  roundEl.textContent = `${round} / ${totalRounds}`;
+const updateScore = () => {
   scoreEl.textContent = score;
 };
 
 const updateTime = () => {
   if (!startTime) {
-    timeEl.textContent = "0.0s";
+    timeEl.textContent = "60s";
     return;
   }
-  const elapsedSeconds = (Date.now() - startTime) / 1000;
-  timeEl.textContent = `${elapsedSeconds.toFixed(1)}s`;
+  const elapsed = Date.now() - startTime;
+  const remaining = Math.max(gameDurationMs - elapsed, 0);
+  timeEl.textContent = `${Math.ceil(remaining / 1000)}s`;
+
+  if (remaining === 0) {
+    endGame();
+  }
 };
 
 const setResult = (message) => {
   resultEl.textContent = message;
 };
 
-const finishGame = () => {
-  inputEl.disabled = true;
+const removeApple = (appleEl) => {
+  const letter = appleEl.dataset.letter;
+  activeApples.delete(letter);
+  appleEl.remove();
+};
+
+const handleAppleMiss = (event) => {
+  const appleEl = event.currentTarget;
+  removeApple(appleEl);
+};
+
+const spawnApple = () => {
+  const letter = getRandomLetter();
+  if (activeApples.has(letter)) {
+    return;
+  }
+
+  const apple = document.createElement("div");
+  apple.className = "apple";
+  apple.dataset.letter = letter;
+  apple.textContent = letter;
+  apple.style.left = `${getRandomPosition()}%`;
+  apple.style.setProperty("--fall-duration", `${getRandomFallDuration()}ms`);
+  apple.addEventListener("animationend", handleAppleMiss);
+
+  activeApples.set(letter, apple);
+  skyEl.appendChild(apple);
+};
+
+const handleKeydown = (event) => {
+  if (!isRunning) {
+    return;
+  }
+  const key = event.key.toUpperCase();
+  if (!letters.includes(key)) {
+    return;
+  }
+
+  const apple = activeApples.get(key);
+  if (apple) {
+    score += 1;
+    updateScore();
+    setResult(`Nice! +1 for ${key}`);
+    removeApple(apple);
+  } else {
+    setResult(`No apple with ${key} yet.`);
+  }
+};
+
+const clearApples = () => {
+  activeApples.forEach((apple) => apple.remove());
+  activeApples.clear();
+};
+
+const startGame = () => {
+  if (isRunning) {
+    return;
+  }
+  isRunning = true;
+  startTime = Date.now();
+  score = 0;
+  updateScore();
+  setResult("Type the letters before they hit the ground!");
+  finalEl.hidden = true;
+  startBtn.hidden = true;
+  restartBtn.hidden = true;
+
+  clearApples();
+  updateTime();
+  timerId = setInterval(updateTime, 200);
+  spawnId = setInterval(spawnApple, spawnIntervalMs);
+  spawnApple();
+};
+
+const endGame = () => {
+  if (!isRunning) {
+    return;
+  }
+  isRunning = false;
   if (timerId) {
     clearInterval(timerId);
     timerId = null;
   }
-  if (hideLetterTimeout) {
-    clearTimeout(hideLetterTimeout);
-    hideLetterTimeout = null;
+  if (spawnId) {
+    clearInterval(spawnId);
+    spawnId = null;
   }
-  promptEl.classList.add("is-hidden");
+
+  setResult("Time's up!");
   finalScoreEl.textContent = score;
-  finalTimeEl.textContent = timeEl.textContent;
   finalEl.hidden = false;
-  setResult("Game over!");
-};
-
-const handleInput = (event) => {
-  if (!startTime) {
-    startTime = Date.now();
-    timerId = setInterval(updateTime, 100);
-  }
-  const value = event.target.value.toUpperCase();
-  if (!value) {
-    return;
-  }
-
-  const isCorrect = value === currentLetter;
-  if (isCorrect) {
-    score += 1;
-    setResult("Correct +1");
-  } else {
-    setResult(`Oops! It was ${currentLetter}`);
-  }
-
-  if (round === totalRounds) {
-    updateStatus();
-    finishGame();
-    return;
-  }
-
-  round += 1;
-  updateStatus();
-  updatePrompt();
+  startBtn.hidden = true;
+  restartBtn.hidden = false;
+  clearApples();
 };
 
 const restartGame = () => {
-  round = 1;
-  score = 0;
+  clearApples();
   startTime = null;
-  if (timerId) {
-    clearInterval(timerId);
-    timerId = null;
-  }
-  if (hideLetterTimeout) {
-    clearTimeout(hideLetterTimeout);
-    hideLetterTimeout = null;
-  }
-  promptEl.classList.remove("is-hidden");
-  finalEl.hidden = true;
-  inputEl.disabled = false;
-  setResult("—");
+  score = 0;
+  updateScore();
   updateTime();
-  updateStatus();
-  updatePrompt();
+  setResult("—");
+  finalEl.hidden = true;
+  startBtn.hidden = false;
+  restartBtn.hidden = true;
 };
 
-inputEl.addEventListener("input", handleInput);
-restartBtn.addEventListener("click", restartGame);
+startBtn.addEventListener("click", startGame);
+restartBtn.addEventListener("click", startGame);
+window.addEventListener("keydown", handleKeydown);
 
-updateStatus();
+updateScore();
 updateTime();
-updatePrompt();

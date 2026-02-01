@@ -19,7 +19,7 @@ body {
 }
 
 .game {
-  width: min(520px, 100%);
+  width: min(720px, 100%);
   background: #ffffff;
   border-radius: 24px;
   padding: 32px;
@@ -49,7 +49,7 @@ header h1 {
 
 .status {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 16px;
 }
 
@@ -74,63 +74,64 @@ header h1 {
   display: block;
 }
 
-.prompt {
-  text-align: center;
-  padding: 24px;
+.sky {
+  position: relative;
+  height: 360px;
   border-radius: 20px;
-  background: linear-gradient(135deg, #d8e7ff, #f3e7ff);
+  background: linear-gradient(180deg, #d9ecff 0%, #f6fbff 70%);
+  overflow: hidden;
+  border: 1px solid #d6e4ff;
 }
 
-.letter {
-  display: block;
-  font-size: 4rem;
-  font-weight: 700;
-  margin-top: 8px;
+.ground {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 36px;
+  background: #d1fae5;
+  border-top: 2px solid #34d399;
 }
 
-.letter-hidden {
-  display: none;
-  font-size: 3rem;
-  font-weight: 600;
-  color: #5b6b8f;
-  margin-top: 12px;
-}
-
-.prompt.is-hidden .letter {
-  opacity: 0.1;
-}
-
-.prompt.is-hidden .letter-hidden {
-  display: block;
-}
-
-.input {
+.apple {
+  position: absolute;
+  top: -60px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ffb3b3, #ff3b30 65%);
   display: grid;
-  gap: 8px;
+  place-items: center;
+  color: #ffffff;
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: 0 12px 24px rgba(255, 59, 48, 0.35);
+  animation: fall var(--fall-duration) linear forwards;
 }
 
-input {
-  font-size: 1.2rem;
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid #cbd5f5;
-  outline: none;
-  transition: border 0.2s ease, box-shadow 0.2s ease;
+.apple::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 22px;
+  width: 12px;
+  height: 12px;
+  background: #16a34a;
+  border-radius: 0 0 8px 8px;
+  transform: rotate(-20deg);
 }
 
-input:focus {
-  border-color: #7c6bff;
-  box-shadow: 0 0 0 3px rgba(124, 107, 255, 0.2);
-}
-
-.helper {
-  margin: 0;
-  color: #6b7280;
-  font-size: 0.9rem;
+@keyframes fall {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(380px);
+  }
 }
 
 .actions {
   display: flex;
+  gap: 12px;
   justify-content: flex-end;
 }
 
@@ -148,6 +149,10 @@ button {
 button:hover {
   transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(47, 66, 255, 0.3);
+}
+
+button[hidden] {
+  display: none;
 }
 
 .final {
