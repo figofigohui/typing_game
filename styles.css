@@ -74,6 +74,24 @@ header h1 {
   display: block;
 }
 
+.select {
+  margin-top: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #cbd5f5;
+  background: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2430;
+  outline: none;
+}
+
+.select:focus {
+  border-color: #7c6bff;
+  box-shadow: 0 0 0 3px rgba(124, 107, 255, 0.2);
+}
+
 .sky {
   position: relative;
   height: 360px;

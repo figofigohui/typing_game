@@ -6,22 +6,37 @@ const timeEl = document.getElementById("time");
 const scoreEl = document.getElementById("score");
 const resultEl = document.getElementById("result");
 const skyEl = document.querySelector(".sky");
+const difficultyEl = document.getElementById("difficulty");
 const startBtn = document.getElementById("start");
 const restartBtn = document.getElementById("restart");
 const finalEl = document.getElementById("final");
 const finalScoreEl = document.getElementById("final-score");
+
+const difficultySettings = {
+  easy: { fallMultiplier: 1.35 },
+  normal: { fallMultiplier: 1 },
+  hard: { fallMultiplier: 0.8 },
+  "very-hard": { fallMultiplier: 0.6 },
+};
 
 let score = 0;
 let startTime = null;
 let timerId = null;
 let spawnId = null;
 let isRunning = false;
+let currentDifficulty = "normal";
 
 const activeApples = new Map();
 
+currentDifficulty = difficultyEl.value;
+
 const getRandomLetter = () => letters[Math.floor(Math.random() * letters.length)];
 const getRandomPosition = () => Math.floor(Math.random() * 80) + 10;
-const getRandomFallDuration = () => Math.floor(Math.random() * 1500) + 2000;
+const getRandomFallDuration = () => {
+  const baseDuration = Math.floor(Math.random() * 1500) + 2000;
+  const { fallMultiplier } = difficultySettings[currentDifficulty];
+  return Math.round(baseDuration * fallMultiplier);
+};
 
 const updateScore = () => {
   scoreEl.textContent = score;
@@ -155,6 +170,9 @@ const restartGame = () => {
 
 startBtn.addEventListener("click", startGame);
 restartBtn.addEventListener("click", startGame);
+difficultyEl.addEventListener("change", (event) => {
+  currentDifficulty = event.target.value;
+});
 window.addEventListener("keydown", handleKeydown);
 
 updateScore();
